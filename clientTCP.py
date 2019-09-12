@@ -2,35 +2,45 @@
 
 import socket
 import time
+import select
 
-tcp_ip = '127.0.0.1'
-tcp_port = 5006
+def deviation(quantity, mean, times):
+	result = 0
+	for x in range(0, quantity):
+		result += ((times[x] - mean) ** 2)
+	return ((result/quantity) ** (1/2))
 
-s = socket.socket(socket.AF_INET,
-				socket.SOCK_DGRAM)
-s.connect((tcp_ip, tcp_port))
+def connectSocket(ip, port):
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.connect((ip, port))
+	s.setblocking(0)
+	return s
 
-times = []
-total = 0
-quantity = 20
+def main():
+	udp_ip = '192.168.0.113'
+	udp_port = 5006
 
-for x in range(0, quantity):
-	begin = time.time()
-	s.send("a".encode())
-	data = s.recv(1024) #Tamanho do buffer.
-	end = time.time()
-	parcialTime = (end-begin)/1000000
-	print ("Atraso:", parcialTime, "ms")
-	times.append(parcialTime)		
-	total += parcialTime
-	time.sleep(1)	
+	s = connectSocket(udp_ip, udp_port)
 
-mean = total/quantity
-print ("Média:", mean)
-result = 0
-for x in range(0, quantity):
-	result += ((times[x] - mean) ** 2)
-deviation = ((result/quantity) ** (1/2))
-print ("Desvio padrão:", deviation)
+	times = []
+	total = 0
+	quantity = 20
 
-s.close()
+	for x in range(0, quantity):
+		begin = time.time()
+		s.send("a".encode())
+		data = s.recv(1024) #Tamanho do buffer.
+		end = time.time()
+		parcialTime = (end-begin)/1000000
+		print ("Atraso:", parcialTime, "ms")
+		times.append(parcialTime)		
+		total += parcialTime
+		time.sleep(1)	
+	
+	mean = total/quantity
+	print ("Média:", mean)
+	print ("Desvio padrão:", deviation(quantity, mean, times))
+
+	s.close()
+
+main()
