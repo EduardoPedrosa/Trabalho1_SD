@@ -13,4 +13,4 @@ while True:
     message, addr = s.recvfrom(1024)
     s.sendto(message, addr)
 
-conn.close()
+s.close()
