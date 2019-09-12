@@ -14,23 +14,23 @@ times = []
 total = 0
 quantity = 20
 
-for x in quantity:
+for x in range(0, quantity):
 	begin = time.time()
 	s.send("a".encode())
 	data = s.recv(1024) #Tamanho do buffer.
 	end = time.time()
-	parcialTime = (end-begin)
-	print ("Tempo gasto: ", parcialTime/1000000, data)
-	times[x] = data
+	parcialTime = (end-begin)/1000000
+	print ("Atraso:", parcialTime, "ms")
+	times.append(parcialTime)		
 	total += parcialTime
-	time.sleep(0.5)
+	time.sleep(1)	
 
 mean = total/quantity
-print ("Média: ", mean)
+print ("Média:", mean)
 result = 0
-for x in quantity:
+for x in range(0, quantity):
 	result += ((times[x] - mean) ** 2)
-deviation = ((result) ** (1/2))
-print ("Desvio padrão: ", deviation)
+deviation = ((result/quantity) ** (1/2))
+print ("Desvio padrão:", deviation)
 
 s.close()
