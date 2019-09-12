@@ -10,36 +10,45 @@ def deviation(quantity, mean, times):
 		result += ((times[x] - mean) ** 2)
 	return ((result/quantity) ** (1/2))
 
-def connectSocket(ip, port):
+def createSocket(ip, port):
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	s.connect((ip, port))
-	s.setblocking(0)
+	s.settimeout(0.030)
 	return s
 
 def main():
-	udp_ip = '192.168.0.113'
+	udp_ip = '192.168.103.20'
 	udp_port = 5006
 
-	s = connectSocket(udp_ip, udp_port)
+	s = createSocket(udp_ip, udp_port)
 
 	times = []
 	total = 0
-	quantity = 20
+	quantityOfTries = 20
+	quantityOfSuccess = 0
 
-	for x in range(0, quantity):
+	for x in range(0, quantityOfTries):
 		begin = time.time()
-		s.send("a".encode())
-		data = s.recv(1024) #Tamanho do buffer.
-		end = time.time()
-		parcialTime = (end-begin)/1000000
-		print ("Atraso:", parcialTime, "ms")
-		times.append(parcialTime)		
-		total += parcialTime
+		s.sendto(str(x).encode(), (udp_ip, udp_port))
+		try:
+			while(True):
+				data, addr = s.recvfrom(1024) #Tamanho do buffer.
+				if(int(data.decode()) == x):			
+					break	
+			end = time.time()
+			parcialTime = (end-begin) * 1000
+			print ("Atraso:", parcialTime, "ms")
+			times.append(parcialTime)
+			quantityOfSuccess += 1		
+			total += parcialTime
+		except socket.timeout:
+			print('timeout') 
+		
 		time.sleep(1)	
 	
-	mean = total/quantity
-	print ("Média:", mean)
-	print ("Desvio padrão:", deviation(quantity, mean, times))
+	mean = total/quantityOfSuccess
+	print ("Média:", mean,"ms")
+	print ("Desvio padrão:", deviation(quantityOfSuccess, mean, times), "ms")
+	print ("Número de pacotes perdidos:", quantityOfTries - quantityOfSuccess)
 
 	s.close()
 
