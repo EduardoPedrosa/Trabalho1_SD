@@ -24,18 +24,21 @@ def main():
 	ip = '127.0.0.1' 
 	udp_port = 5006
 	tcp_port = 5007
-	if(len(sys.argv) > 1):
-		ip = sys.argv[1]  #ip do servidor
+	quantityOfTries = 20
+	if(len(sys.argv) > 1):		
+		quantityOfTries = int(sys.argv[1])  #numero de tentativas para o RTT
 	if(len(sys.argv) > 2):
-		udp_port = int(sys.argv[2])  #porta do servidor de RTT e atraso
-	if(len(sys.argv) > 3):		
-		tcp_port = int(sys.argv[3])  #porta do servidor de vazão
+		ip = sys.argv[2]  #ip do servidor
+	if(len(sys.argv) > 3):
+		udp_port = int(sys.argv[3])  #porta do servidor de RTT e atraso
+	if(len(sys.argv) > 4):		
+		tcp_port = int(sys.argv[4])  #porta do servidor de vazão
+	
 
 	s = createSocketUDP()
 
 	times = []
 	total = 0
-	quantityOfTries = 20
 	quantityOfSuccess = 0
 	for x in range(0, quantityOfTries):
 		begin = time.time()
@@ -73,7 +76,10 @@ def main():
 		mean = total/quantityOfSuccess
 		print ("Média:", mean,"ms")
 		print ("Desvio padrão:", deviation(quantityOfSuccess, mean, times), "ms")
-	print ("Número de pacotes perdidos:", quantityOfTries - quantityOfSuccess)
-	print ("Vazão", throughput)
+	lostPackages = quantityOfTries - quantityOfSuccess
+	print("Número de pacotes enviados com sucesso:", quantityOfSuccess)
+	print ("Número de pacotes perdidos:", lostPackages)
+	print("Porcentagem de pacotes perdidos:", (lostPackages/quantityOfTries)*100, "%")
+	print ("Vazão", throughput, "MB/s")
 
 main()
